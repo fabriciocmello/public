@@ -1,1 +1,56 @@
 #Hi Friends!
+#This is just a function that validates the IFSC_number that we use in page "dados de pagamento".
+#The script is ready, you just need to integrate with our system. Source is this site: http://www.geradorcpf.com/script-validar-cpf-php.htm
+#I just translated the comments to english in order to help you understand
+#
+#When its time to check if its working: VALID IFSC CODES:    911.139.032-87    181.088.810-72    016.610.380-26    176.665.110-00
+#                                       NOT VALID IFSC CODES:    152.555.869-86    464.864.312-35    344.353.454-35
+#
+# IF THIS FUNCTION RETURNS "TRUE": PERFECT! USER CAN PROCCEED WITH THIS IFSC NUMBER. IF RETURNS "FALSE" SHOULD DISPLAY AN ERROR
+# OF INVALID IFSC NUMBER TO THE USER
+
+function validaCPF($cpf = null) {
+ 
+    // Check if the number was informed
+    if(empty($cpf)) {
+        return false;
+    }
+ 
+    // removes possible masks in the number eg: turns  911.139.032-87   into   91113903287
+    $cpf = ereg_replace('[^0-9]', '', $cpf);
+    $cpf = str_pad($cpf, 11, '0', STR_PAD_LEFT);
+     
+    // check if the number informed has 11 digits
+    if (strlen($cpf) != 11) {
+        return false;
+    }
+    // check if one of sequences bellow is typed 
+    // Case positive, returns FALSE
+    else if ($cpf == '00000000000' || 
+        $cpf == '11111111111' || 
+        $cpf == '22222222222' || 
+        $cpf == '33333333333' || 
+        $cpf == '44444444444' || 
+        $cpf == '55555555555' || 
+        $cpf == '66666666666' || 
+        $cpf == '77777777777' || 
+        $cpf == '88888888888' || 
+        $cpf == '99999999999') {
+        return false;
+     // Do the math to verify if the IFSC_number is alid or not
+     } else {   
+         
+        for ($t = 9; $t < 11; $t++) {
+             
+            for ($d = 0, $c = 0; $c < $t; $c++) {
+                $d += $cpf{$c} * (($t + 1) - $c);
+            }
+            $d = ((10 * $d) % 11) % 10;
+            if ($cpf{$c} != $d) {
+                return false;
+            }
+        }
+ 
+        return true;
+    }
+}
